@@ -1,0 +1,93 @@
+  .stars-wrapper {
+    z-index: -1;
+    position: relative;
+    pointer-events: none;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(#16161d, #1f1f3a, #3b2f4a);
+    overflow: hidden;
+  }
+
+  .stars {
+    position: absolute;
+    fill: white;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    --twinkle-duration: 4s;
+    animation: twinkle var(--twinkle-duration) ease-in-out infinite;
+  }
+
+  .stars2 {
+    position: absolute;
+    fill: white;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    --twinkle-duration: 3.1415926s;
+    animation: twinkle2 var(--twinkle-duration) ease-in-out infinite;
+  }
+
+  .stars3 {
+    position: absolute;
+    fill: white;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    --twinkle-duration: 5.21s;
+    animation: twinkle3 var(--twinkle-duration) ease-in-out infinite;
+  }
+
+  @keyframes twinkle {
+    25% {
+      opacity: 0.1;
+    }
+  }
+
+  @keyframes twinkle2 {
+    25% {
+      opacity: 0.05;
+    }
+  }
+
+  @keyframes twinkle3 {
+    25% {
+      opacity: 0.2;
+    }
+  }
+
+  .comet {
+    transform-origin: center center;
+    animation: comet 10s linear infinite;
+
+  }
+
+  @keyframes comet {
+
+    0%,
+    40% {
+      transform: translateX(0);
+      opacity: 0;
+    }
+
+    50% {
+      opacity: 1;
+    }
+
+    60%,
+    100% {
+      transform: translateX(-100vmax);
+      opacity: 0;
+    }
+  }
+
+  .comet-b {
+    animation-delay: -3.3s;
+  }
+
+  .comet-c {
+    animation-delay: -5s;
+  }
