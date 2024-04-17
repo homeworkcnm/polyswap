@@ -24,8 +24,6 @@ const getTokenAddressBySymbol = (tokenSymbol: string): string => {
   return tokenAddressMap[tokenSymbol] || '';
 };
 
-
-
 const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   const [upToken, setUpToken] = useState('');
   const [downToken, setDownToken] = useState('');
@@ -33,8 +31,6 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   const [toToken, setToToken] = useState('');
   const [fromamount, setFromAmount] = useState('');
   const [toamount, setToAmount] = useState('');
-  const [valueWithDecimals1, setvalueWithDecimals1] = useState('');
-  const [valueWithDecimals2, setvalueWithDecimals2] = useState('');
   const [v1amount, setV1Amount] = useState('');
   const [v11amount, setV11Amount] = useState('');
   const [v22amount, setV22Amount] = useState('');
@@ -129,73 +125,38 @@ loadWeb3();
   const handleUpTokenChange = async (event: React.ChangeEvent<{ value: unknown }>) => {
     const newToken = event.target.value as string;
     setUpToken(newToken);
-    // console.log("ssssssssss");
-    // if (upToken && downToken && fromamount && !toamount){
-    //   console.log("pppppppppppp");
-    //   await calculateOtherAmountT(fromamount);
-    // }else if (upToken && downToken && toamount && !fromamount){
-    //   console.log("oooooooooooooo");
-    //   calculateOtherAmountF(toamount);
-    // }
   };
 
   const handleDownTokenChange = async (event: React.ChangeEvent<{ value: unknown }>) => {
     const newToken = event.target.value as string;
     setDownToken(newToken);
-    // console.log("ssssssssss");
-    // if (downToken && upToken && fromamount && !toamount){
-    //   console.log("pppppppppppp");
-    //   await calculateOtherAmountT(fromamount);
-    // }else if (downToken && upToken && toamount && !fromamount){
-    //   console.log("oooooooooooooo");
-    //   calculateOtherAmountF(toamount);
-    // }
   };
 
   const handleFromAmountChange = async (event) => {
     const newAmount = event.target.value;
-    const Decimals1 = newAmount + '000000000000000000';
     setFromAmount(newAmount);
-    setvalueWithDecimals1(Decimals1);
-    // console.log(newAmount);
-    // if(fromamount && upToken && downToken){
-    //   console.log('calcuating');
-    //   calculateOtherAmountT(valueWithDecimals);
-    // }
   };
 
   const handleToAmountChange = async (event) => {
     const newAmount = event.target.value;
-    const Decimals2 = newAmount + '000000000000000000';
-    setToAmount(Decimals2);
-    // console.log(newAmount);
-    // if(toamount && upToken && downToken){
-    //   calculateOtherAmountF(valueWithDecimals)
-    // }
+    setToAmount(newAmount);
   };
 
   useEffect(() => {
-    // Check if three of the four values are set
-    const values = [upToken, downToken, fromamount, toamount, valueWithDecimals1, valueWithDecimals2];
-    const filledValues = values.filter(Boolean).length; // Count how many are truthy
+    // 检查设置的值数量
+    const values = [upToken, downToken, fromamount, toamount];
+    const filledValues = values.filter(Boolean).length;
   
     if (filledValues >= 3) {
-      // Determine which function to call based on what is available
       if (fromamount && upToken && downToken) {
         console.log('Calculating from upToken to downToken...');
-        calculateOtherAmountT(valueWithDecimals1);
+        calculateOtherAmountT(fromamount);
       } else if (toamount && upToken && downToken) {
         console.log('Calculating from downToken to upToken...');
-        calculateOtherAmountF(valueWithDecimals2);
+        calculateOtherAmountF(toamount);
       }
     }
-  }, [upToken, downToken, fromamount, toamount]);
-
-
-  
-  // const handleLpChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-  //   setLp(event.target.value as string);
-  // };
+  }, [upToken, downToken, fromamount, toamount]); // 这些是依赖项，任何一个变化都会触发这个效果
 
   const handleGetRateClick = () => {
     setCurrentView('rate');
@@ -251,8 +212,6 @@ loadWeb3();
     }
   };
 
-
-
   const calculateOtherAmountT = async (value) => {
     console.log('pigggggggg');
     if (!upToken || !downToken || !fromamount) {
@@ -274,12 +233,13 @@ loadWeb3();
       const DownAddress = getTokenAddressBySymbol(downToken);
       console.log(DownAddress);
       let calculated;
-      const maxUint256 = '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'; 
-      if (!toamount) {
+      // if (!toamount) {
         calculated = await contractInstance.methods.swapExactTokensForTokens(value, 0, [UpAddress, DownAddress], userAddress, false).call();
-        setToAmount(calculated);
         console.log(calculated);
-      }
+        const outputAmount = calculated[1].toString();  // 转换 BigNumber 为字符串
+        setToAmount(outputAmount);
+        console.log(outputAmount);
+      // }
       setLoading(false);
     } catch (error) {
       console.error('Error calculating token amount:', error);
@@ -308,12 +268,16 @@ loadWeb3();
       const DownAddress = getTokenAddressBySymbol(downToken);
       console.log(DownAddress);
       let calculated;
-      const maxUint256 = '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'; 
-      if (!fromamount) {
-        calculated = await contractInstance.methods.swapTokensForExactTokens(value, maxUint256, [DownAddress, UpAddress], userAddress, false).call();
-        setFromAmount(calculated);
+      // const maxUint256 = '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'; 
+      // const maxUint256 = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+      // console.log(maxUint256);
+      // if (!fromamount) {
+        calculated = await contractInstance.methods.swapTokensForExactTokens(value, 0, [DownAddress, UpAddress], userAddress, false).call();
         console.log(calculated);
-      }
+        const outputAmount = calculated[0].toString();  // 转换 BigNumber 为字符串
+        setFromAmount(outputAmount);
+        console.log(outputAmount);
+      // }
       setLoading(false);
     } catch (error) {
       console.error('Error calculating token amount:', error);
@@ -375,7 +339,7 @@ loadWeb3();
         </Grid>
         <Grid item xs={6}>
           <Button variant="contained" color="primary" fullWidth onClick={handleGetRateClick}>
-            S
+            SWAP
           </Button>
         </Grid>
         <Grid item xs={6}>
@@ -417,7 +381,7 @@ loadWeb3();
         </Grid>
         <Grid item xs={6}>
           <Button variant="contained" color="secondary" fullWidth onClick={performSwap}>
-            SWAP
+            CONFIRM SWAP
           </Button>
         </Grid>
         {transactionHash && (
