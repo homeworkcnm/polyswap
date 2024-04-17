@@ -3,6 +3,7 @@ import Web3, {Contract} from "web3";
 import { TextField, Button, Grid, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import styles from '../styles/Card.module.css';
 import contractABI from '../out/PolyswapRouter.sol/PolyswapRouter.json';
+import tokenABI from '../out/ERC20.sol/ERC20.json';
 
 interface FlipCardProps {
   hue: number;
@@ -40,6 +41,10 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   // const [contractInstance, setContractInstance] = useState(null);
   const [contractInstance, setContractInstance] = useState<Contract | null>(null);
   const contractAddress='0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9';
+  const [token0contractInstance, setToken0ContractInstance] = useState<Contract | null>(null);
+  const token0contractAddress='0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
+  const [token1contractInstance, setToken1ContractInstance] = useState<Contract | null>(null);
+  const token1contractAddress='0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0';
   const [web3Instance, setWeb3Instance] = useState<Web3 | null>(null);
   const [isCurved,setIsCurved] = useState(false) ;
   
@@ -59,8 +64,14 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   
     if (!contractInstance) {
       const contract = new web3.eth.Contract(contractABI.abi, contractAddress);
+      const token0contract = new web3.eth.Contract(tokenABI.abi, token0contractAddress);
+      const token1contract = new web3.eth.Contract(tokenABI.abi, token1contractAddress);
       console.log("contract instance created", contract);
+      console.log("token0contract instance created", token0contract);
+      console.log("token1contract instance created", token1contract);
       setContractInstance(contract);
+      setToken0ContractInstance(token0contract);
+      setToken1ContractInstance(token1contract);
 
       const accounts = await web3.eth.getAccounts();
       const userAddress = accounts[0];
@@ -84,11 +95,15 @@ loadWeb3();
   }, [fromToken, toToken, amount]);
   
   const handleV1AmountChange = (event) => {
-    setV1Amount(event.target.value);
+    const etherValue = event.target.value;
+    const weiValue = Web3.utils.toWei(etherValue, 'ether');
+    setV1Amount(weiValue);
   };
 
   const handleV2AmountChange = (event) => {
-    setV2Amount(event.target.value);
+    const etherValue = event.target.value;
+    const weiValue = Web3.utils.toWei(etherValue, 'ether');
+    setV2Amount(weiValue);
   };
   
   const handleAmountChange = async (event) => {
@@ -218,6 +233,13 @@ loadWeb3();
       const tokenBAddress = getTokenAddressBySymbol(toToken);
       const accounts = await web3.eth.getAccounts();
       const userAddress = accounts[0];
+      const token0contract = new web3.eth.Contract(tokenABI.abi, token0contractAddress);
+      const token1contract = new web3.eth.Contract(tokenABI.abi, token1contractAddress);
+      await Promise.all([
+        token0contract.methods.approve(contractAddress, v1amount).send({ from: userAddress }),
+        token1contract.methods.approve(contractAddress, v2amount).send({ from: userAddress })
+      ]);
+      console.log("approve finished!");
       // 调用合约函数添加流动性
       const receipt = await contractInstance.methods.addLiquidity(
         tokenAAddress,
