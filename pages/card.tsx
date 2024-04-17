@@ -41,7 +41,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   const [contractInstance, setContractInstance] = useState<Contract | null>(null);
   const contractAddress='0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9';
   const [web3Instance, setWeb3Instance] = useState<Web3 | null>(null);
-  const [isCurved,setIsCurved] = useState('') ;
+  const [isCurved,setIsCurved] = useState(false) ;
   
   useEffect(() => {
     const loadWeb3 = async () => {
@@ -193,13 +193,14 @@ loadWeb3();
   };
 
   const handleLPChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    const isCurved = event.target.value as string;
-    setIsCurved(isCurved);
+    const value = event.target.value as string;
     // 根据用户选择的 Token 来更新 isCurved 状态
-    if (lp === 'Constant') {
-      setIsCurved('false');
-    } else if (lp === 'Curve') {
-      setIsCurved('true');
+    if (value === 'Constant') {
+      setLp('Constant');
+      setIsCurved(false);
+    } else if (value === 'Curve') {
+      setLp('Curve')
+      setIsCurved(true);
     }
   };
 
@@ -226,7 +227,7 @@ loadWeb3();
         0, // amountAMin
         0, // amountBMin
         userAddress, // to (可以是用户的地址或其他目标地址)
-        false // isCurveBased，这里根据实际情况传递参数
+        isCurved // isCurveBased，这里根据实际情况传递参数
       ).send({ from: userAddress }); // 你需要从哪个地址发送交易
       // 处理返回的交易收据
       console.log('Transaction receipt:', receipt);
@@ -340,9 +341,9 @@ loadWeb3();
         <Grid item xs={3}>
           <FormControl fullWidth>
             <InputLabel>Pool</InputLabel>
-            <Select value={isCurved} onChange={handleLPChange}>
-              <MenuItem value="V1">Constant</MenuItem>
-              <MenuItem value="V2">Curve</MenuItem>
+            <Select value={lp} onChange={handleLPChange}>
+              <MenuItem value="Constant">Constant</MenuItem>
+              <MenuItem value="Curve">Curve</MenuItem>
             </Select>
           </FormControl>
         </Grid>
