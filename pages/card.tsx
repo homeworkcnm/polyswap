@@ -27,9 +27,12 @@ const getTokenAddressBySymbol = (tokenSymbol: string): string => {
 
 
 const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
+  const [upToken, setUpToken] = useState('');
+  const [downToken, setDownToken] = useState('');
   const [fromToken, setFromToken] = useState('');
   const [toToken, setToToken] = useState('');
-  const [amount, setAmount] = useState('');
+  const [fromamount, setFromAmount] = useState('');
+  const [toamount, setToAmount] = useState('');
   const [v1amount, setV1Amount] = useState('');
   const [v11amount, setV11Amount] = useState('');
   const [v22amount, setV22Amount] = useState('');
@@ -98,12 +101,6 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
 
 loadWeb3();
   }, [contractInstance]);
-
-  useEffect(() => {
-    if (fromToken && toToken && amount) {
-      getRate();
-    }
-  }, [fromToken, toToken, amount]);
   
   const handleV1AmountChange = (event) => {
     const etherValue = event.target.value;
@@ -118,43 +115,6 @@ loadWeb3();
     setV22Amount(etherValue);
     setV2Amount(weiValue);
   };
-  
-  const handleAmountChange = async (event) => {
-    const newAmount = event.target.value;
-    setAmount(newAmount);
-    await calculateOtherAmount(newAmount, 'from');
-  };
-
-  const handleCalculatedAmountChange = async (event) => {
-    const newCalculatedAmount = event.target.value;
-    setCalculatedAmount(newCalculatedAmount);
-    await calculateOtherAmount(newCalculatedAmount, 'to');
-  };
-
-  const calculateOtherAmount = async (value, direction) => {
-    if (!fromToken || !toToken) {
-      setError('Please select both token types.');
-      return;
-    }
-    try {
-      setLoading(true);
-      let calculated;
-      const fromTokenAddress = getTokenAddressBySymbol(fromToken);
-      const toTokenAddress = getTokenAddressBySymbol(toToken);
-      if (direction === 'from') {
-        calculated = await contractInstance.methods.swapExactTokensForTokens(value, 0, [fromTokenAddress, toTokenAddress], toTokenAddress).call();
-        setCalculatedAmount(calculated);
-      } else {
-        calculated = await contractInstance.methods.swapTokensForExactTokens(value, 0, [fromTokenAddress, toTokenAddress], toTokenAddress).call();
-        setAmount(calculated);
-      }
-      setLoading(false);
-    } catch (error) {
-      console.error('Error calculating token amount:', error);
-      direction === 'from' ? setCalculatedAmount('') : setAmount('');
-      setLoading(false);
-    }
-  };
 
   const handleFromTokenChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     setFromToken(event.target.value as string);
@@ -163,6 +123,51 @@ loadWeb3();
   const handleToTokenChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     setToToken(event.target.value as string);
   };
+  
+  const handleUpTokenChange = async (event: React.ChangeEvent<{ value: unknown }>) => {
+    const newToken = event.target.value as string;
+    setUpToken(newToken);
+    if (downToken && fromamount){
+      await calculateOtherAmount(fromamount);
+    }else if (downToken && toamount){
+      calculateOtherAmount(toamount);
+    }
+  };
+
+  const handleDownTokenChange = async (event: React.ChangeEvent<{ value: unknown }>) => {
+    const newToken = event.target.value as string;
+    setDownToken(newToken);
+    if (upToken && fromamount){
+      await calculateOtherAmount(fromamount, 'from');
+    }else if (upToken && toamount){
+      calculateOtherAmount(toamount);
+    }
+  };
+
+  const handleFromAmountChange = async (event) => {
+    const newAmount = event.target.value;
+    const valueWithDecimals = newAmount + '000000000000000000';
+    setFromAmount(newAmount);
+    console.log(newAmount);
+    if(upToken && downToken){
+      console.log('calcuating');
+      calculateOtherAmount(valueWithDecimals);
+    }
+  };
+
+  const handleToAmountChange = async (event) => {
+    const newAmount = event.target.value;
+    const valueWithDecimals = newAmount + '000000000000000000';
+    setToAmount(newAmount);
+    console.log(newAmount);
+    if(upToken && downToken){
+      calculateOtherAmount(valueWithDecimals, 'to')
+    }
+  };
+
+
+
+
   
   // const handleLpChange = (event: React.ChangeEvent<{ value: unknown }>) => {
   //   setLp(event.target.value as string);
@@ -179,7 +184,7 @@ loadWeb3();
   };
 
   const getRate = async () => {
-    if (!amount || !fromToken || !toToken) {
+    if (!toamount || !fromToken || !toToken) {
       setError('Please ensure all fields are filled out correctly.');
       return;
     }
@@ -195,7 +200,7 @@ loadWeb3();
   };
 
   const performSwap = async () => {
-    if (!amount || !fromToken || !toToken) {
+    if (!fromamount || !fromToken || !toToken) {
       setError('Please ensure all fields are filled out correctly.');
       return;
     }
@@ -210,16 +215,6 @@ loadWeb3();
     }
   };
 
-  const calculateAmount = async () => {
-    try {
-      const calculated = await contractInstance.methods.calculateTokenAmount(fromToken, toToken, amount).call();
-      setCalculatedAmount(calculated);
-    } catch (error) {
-      console.error('Error calculating token amount:', error);
-      setCalculatedAmount('');
-    }
-  };
-
   const handleLPChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     const value = event.target.value as string;
     // 根据用户选择的 Token 来更新 isCurved 状态
@@ -229,6 +224,43 @@ loadWeb3();
     } else if (value === 'Curve') {
       setLp('Curve')
       setIsCurved(true);
+    }
+  };
+
+
+
+  const calculateOtherAmount = async (value) => {
+    console.log('pigggggggg');
+    if (!upToken || !downToken || !fromamount || !toamount) {
+      setError('Please select both token types.');
+      return;
+    }
+    try {
+      setLoading(true);
+      const web3 = new Web3((window as any).ethereum);
+      setWeb3Instance(web3);
+      if(!web3){
+      console.log("00000000000000");}
+      const UpAddress = getTokenAddressBySymbol(upToken);
+      console.log(UpAddress);
+      const DownAddress = getTokenAddressBySymbol(downToken);
+      console.log(DownAddress);
+      let calculated;
+      const maxUint256 = '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'; 
+      if (!toamount) {
+        calculated = await contractInstance.methods.swapExactTokensForTokens(value, 0, [UpAddress, DownAddress], userAddress, false).call();
+        setCalculatedAmount(calculated);
+        console.log(calculated);
+      } else {
+        calculated = await contractInstance.methods.swapTokensForExactTokens(value, maxUint256, [DownAddress, UpAddress], userAddress, false).call();
+        setCalculatedAmount(calculated);
+        console.log(calculated);
+      }
+      setLoading(false);
+    } catch (error) {
+      console.error('Error calculating token amount:', error);
+      // direction === 'from' ? setCalculatedAmount('') : setAmount('');
+      setLoading(false);
     }
   };
 
@@ -297,24 +329,24 @@ loadWeb3();
         {currentView === 'rate' && (
           <React.Fragment>
         <Grid item xs={9}>
-          <TextField label="From Token" type="number" fullWidth value={amount} onChange={handleAmountChange}/>
+          <TextField label="From Token" type="number" fullWidth value={fromamount} onChange={handleFromAmountChange}/>
         </Grid>
         <Grid item xs={3}>
           <FormControl fullWidth>
             <InputLabel>Coin Type</InputLabel>
-            <Select value={fromToken} onChange={handleFromTokenChange}>
+            <Select value={upToken} onChange={handleUpTokenChange}>
               <MenuItem value="TOKEN0">TOKEN0</MenuItem>
               <MenuItem value="TOKEN1">TOKEN1</MenuItem>
             </Select>
           </FormControl>
         </Grid>
         <Grid item xs={9}>
-          <TextField label="To Token" fullWidth value={calculatedAmount} onChange={handleCalculatedAmountChange} />
+          <TextField label="To Token" type="number" fullWidth value={toamount} onChange={handleToAmountChange} />
         </Grid>
         <Grid item xs={3}>
           <FormControl fullWidth>
             <InputLabel>Coin Type</InputLabel>
-            <Select value={toToken} onChange={handleToTokenChange}>
+            <Select value={downToken} onChange={handleDownTokenChange}>
               <MenuItem value="TOKEN0">TOKEN0</MenuItem>
               <MenuItem value="TOKEN1">TOKEN1</MenuItem>
             </Select>
