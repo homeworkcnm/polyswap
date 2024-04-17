@@ -67,6 +67,9 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <WagmiConfig config={wagmiConfig}>
       <RainbowKitProvider coolMode chains={chains}>
+      <div style={{ fontFamily: 'Roboto Condensed', fontSize: '36px', color: 'white', position: 'absolute', top: 50, left: 40, padding: '10px' }}>
+          Polyswap
+        </div>
         <Component {...pageProps} />
       </RainbowKitProvider>
     </WagmiConfig>

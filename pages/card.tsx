@@ -4,6 +4,7 @@ import { TextField, Button, Grid, MenuItem, Select, InputLabel, FormControl } fr
 import styles from '../styles/Card.module.css';
 import contractABI from '../out/PolyswapRouter.sol/PolyswapRouter.json';
 import tokenABI from '../out/ERC20.sol/ERC20.json';
+import { ethers } from 'ethers';
 
 interface FlipCardProps {
   hue: number;
@@ -47,7 +48,27 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   const token1contractAddress='0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0';
   const [web3Instance, setWeb3Instance] = useState<Web3 | null>(null);
   const [isCurved,setIsCurved] = useState(false) ;
+  const [userAddress, setUserAddress] = useState('');
   
+  useEffect(() => {
+  const fetchUserAddress = async () => {
+    if ((window as any).ethereum) {
+      console.log('success');
+      try {
+        await (window as any).ethereum.enable();
+        const provider = new ethers.providers.Web3Provider((window as any).ethereum);
+        const signer = provider.getSigner();
+        const address = await signer.getAddress();
+        setUserAddress(address);
+      } catch (error) {
+        console.error('Failed to fetch user address:', error);
+      }
+    }
+  };
+
+  fetchUserAddress();
+}, []);
+
   useEffect(() => {
     const loadWeb3 = async () => {
     console.log("Checking web3...")
@@ -57,25 +78,13 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
     const web3 = new Web3((window as any).ethereum);
     setWeb3Instance(web3);
     console.log("web3 instance created", web3);
-    
     // 请求用户授权访问其以太坊账户
     await (window as any).ethereum.request({ method: "eth_requestAccounts" });
     console.log("ethereum enabled"); 
-  
     if (!contractInstance) {
       const contract = new web3.eth.Contract(contractABI.abi, contractAddress);
-      const token0contract = new web3.eth.Contract(tokenABI.abi, token0contractAddress);
-      const token1contract = new web3.eth.Contract(tokenABI.abi, token1contractAddress);
       console.log("contract instance created", contract);
-      console.log("token0contract instance created", token0contract);
-      console.log("token1contract instance created", token1contract);
       setContractInstance(contract);
-      setToken0ContractInstance(token0contract);
-      setToken1ContractInstance(token1contract);
-
-      const accounts = await web3.eth.getAccounts();
-      const userAddress = accounts[0];
-      console.log("User address", userAddress);
     }
     }catch (error) {
       console.error("Error initializing web3 or contract:", error);
@@ -231,16 +240,17 @@ loadWeb3();
       setWeb3Instance(web3);
       const tokenAAddress = getTokenAddressBySymbol(fromToken);
       const tokenBAddress = getTokenAddressBySymbol(toToken);
-      const accounts = await web3.eth.getAccounts();
-      const userAddress = accounts[0];
       const token0contract = new web3.eth.Contract(tokenABI.abi, token0contractAddress);
       const token1contract = new web3.eth.Contract(tokenABI.abi, token1contractAddress);
       await Promise.all([
+        console.log('start calling'),
         token0contract.methods.approve(contractAddress, v1amount).send({ from: userAddress }),
-        token1contract.methods.approve(contractAddress, v2amount).send({ from: userAddress })
+        console.log("token0"),
+        token1contract.methods.approve(contractAddress, v2amount).send({ from: userAddress }),
+        console.log('token1')
       ]);
       console.log("approve finished!");
-      // 调用合约函数添加流动性
+      //调用合约函数添加流动性
       const receipt = await contractInstance.methods.addLiquidity(
         tokenAAddress,
         tokenBAddress,
@@ -262,12 +272,12 @@ loadWeb3();
   };
 
   return (
-    <div className={styles['flip-card-container']} >
+    <div className={styles['flip-card-container']} style={{ "--hue": hue }}>
       <Grid container spacing={2} className={styles['custom-grid-padding']}>
         <Grid item xs={12}>
-          {details.map((detail, index) => (
+          {/* {details.map((detail, index) => (
             <li key={index} className={styles['li']}>{detail}</li>
-          ))}
+          ))} */}
         </Grid>
         <Grid item xs={6}>
           <Button variant="contained" color="primary" fullWidth onClick={handleGetRateClick}>
@@ -291,7 +301,6 @@ loadWeb3();
             <Select value={fromToken} onChange={handleFromTokenChange}>
               <MenuItem value="TOKEN0">TOKEN0</MenuItem>
               <MenuItem value="TOKEN1">TOKEN1</MenuItem>
-              {/* Add more coins as needed */}
             </Select>
           </FormControl>
         </Grid>
