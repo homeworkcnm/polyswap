@@ -127,10 +127,13 @@ loadWeb3();
   const handleUpTokenChange = async (event: React.ChangeEvent<{ value: unknown }>) => {
     const newToken = event.target.value as string;
     setUpToken(newToken);
+    console.log("ssssssssss");
     if (downToken && fromamount){
-      await calculateOtherAmount(fromamount);
+      console.log("pppppppppppp");
+      await calculateOtherAmountT(fromamount);
     }else if (downToken && toamount){
-      calculateOtherAmount(toamount);
+      console.log("oooooooooooooo");
+      calculateOtherAmountF(toamount);
     }
   };
 
@@ -138,9 +141,11 @@ loadWeb3();
     const newToken = event.target.value as string;
     setDownToken(newToken);
     if (upToken && fromamount){
-      await calculateOtherAmount(fromamount);
+      console.log("pppppppppppp");
+      await calculateOtherAmountT(fromamount);
     }else if (upToken && toamount){
-      calculateOtherAmount(toamount);
+      console.log("oooooooooooooo");
+      calculateOtherAmountF(toamount);
     }
   };
 
@@ -151,7 +156,7 @@ loadWeb3();
     console.log(newAmount);
     if(upToken && downToken){
       console.log('calcuating');
-      calculateOtherAmount(valueWithDecimals);
+      calculateOtherAmountT(valueWithDecimals);
     }
   };
 
@@ -161,7 +166,7 @@ loadWeb3();
     setToAmount(newAmount);
     console.log(newAmount);
     if(upToken && downToken){
-      calculateOtherAmount(valueWithDecimals)
+      calculateOtherAmountF(valueWithDecimals)
     }
   };
 
@@ -229,9 +234,13 @@ loadWeb3();
 
 
 
-  const calculateOtherAmount = async (value) => {
+  const calculateOtherAmountT = async (value) => {
     console.log('pigggggggg');
-    if (!upToken || !downToken || !fromamount || !toamount) {
+    if (!upToken || !downToken || !fromamount) {
+      console.log("biggggggggggggggggg");
+      console.log(upToken);
+      console.log(downToken);
+      console.log(fromamount);
       setError('Please select both token types.');
       return;
     }
@@ -251,7 +260,37 @@ loadWeb3();
         calculated = await contractInstance.methods.swapExactTokensForTokens(value, 0, [UpAddress, DownAddress], userAddress, false).call();
         setToAmount(calculated);
         console.log(calculated);
-      } else {
+      }
+      setLoading(false);
+    } catch (error) {
+      console.error('Error calculating token amount:', error);
+      // direction === 'from' ? setCalculatedAmount('') : setAmount('');
+      setLoading(false);
+    }
+  };
+
+  const calculateOtherAmountF = async (value) => {
+    console.log('pigggggggg');
+    if (!upToken || !downToken || !toamount) {
+      console.log(upToken);
+      console.log(downToken);
+      console.log(toamount);
+      setError('Please select both token types.');
+      return;
+    }
+    try {
+      setLoading(true);
+      const web3 = new Web3((window as any).ethereum);
+      setWeb3Instance(web3);
+      if(!web3){
+      console.log("00000000000000");}
+      const UpAddress = getTokenAddressBySymbol(upToken);
+      console.log(UpAddress);
+      const DownAddress = getTokenAddressBySymbol(downToken);
+      console.log(DownAddress);
+      let calculated;
+      const maxUint256 = '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'; 
+      if (!fromamount) {
         calculated = await contractInstance.methods.swapTokensForExactTokens(value, maxUint256, [DownAddress, UpAddress], userAddress, false).call();
         setFromAmount(calculated);
         console.log(calculated);
