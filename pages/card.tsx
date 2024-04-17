@@ -52,6 +52,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   const [web3Instance, setWeb3Instance] = useState<Web3 | null>(null);
   const [isCurved,setIsCurved] = useState(false) ;
   const [userAddress, setUserAddress] = useState('');
+  const [buttonText, setButtonText] = useState('Get Exchange Rate');
   
   useEffect(() => {
   const fetchUserAddress = async () => {
@@ -160,28 +161,10 @@ loadWeb3();
 
   const handleGetRateClick = () => {
     setCurrentView('rate');
-    getRate();
   };
 
   const handleLiquidityClick = () => {
     setCurrentView('liquidity');
-    performSwap();
-  };
-
-  const getRate = async () => {
-    if (!toamount || !fromToken || !toToken) {
-      setError('Please ensure all fields are filled out correctly.');
-      return;
-    }
-    try {
-      setLoading(true);
-      const rate = await contractInstance.methods.getExchangeRate(fromToken, toToken, amount).call();
-      setExchangeRate(rate);
-      setLoading(false);
-    } catch (err) {
-      setError('Failed to fetch exchange rate');
-      setLoading(false);
-    }
   };
 
   const performSwap = async () => {
@@ -235,6 +218,9 @@ loadWeb3();
       let calculated;
       // if (!toamount) {
         calculated = await contractInstance.methods.swapExactTokensForTokens(value, 0, [UpAddress, DownAddress], userAddress, false).call();
+        const rate = value/Number(calculated[1])
+        setExchangeRate(rate.toString());
+        setButtonText(`1 ${upToken} = ${rate.toFixed(2)} ${downToken}`);;
         console.log(calculated);
         const outputAmount = calculated[1].toString();  // 转换 BigNumber 为字符串
         setToAmount(outputAmount);
@@ -273,6 +259,9 @@ loadWeb3();
       // console.log(maxUint256);
       // if (!fromamount) {
         calculated = await contractInstance.methods.swapTokensForExactTokens(value, 0, [DownAddress, UpAddress], userAddress, false).call();
+        const rate = Number(calculated[0])/value;
+        setExchangeRate(rate.toString());
+        setButtonText(`1 ${upToken} = ${rate.toFixed(2)} ${downToken}`);
         console.log(calculated);
         const outputAmount = calculated[0].toString();  // 转换 BigNumber 为字符串
         setFromAmount(outputAmount);
@@ -375,12 +364,12 @@ loadWeb3();
           </FormControl>
         </Grid>
         <Grid item xs={6}>
-          <Button variant="contained" color="primary" fullWidth onClick={getRate}>
-            Get Exchange Rate
+          <Button variant="contained" color="primary" fullWidth>
+          {buttonText}
           </Button>
         </Grid>
         <Grid item xs={6}>
-          <Button variant="contained" color="secondary" fullWidth onClick={performSwap}>
+          <Button variant="contained" color="secondary" fullWidth >
             CONFIRM SWAP
           </Button>
         </Grid>
@@ -389,11 +378,11 @@ loadWeb3();
           <p>Transaction Hash: {transactionHash}</p>
           </Grid>
         )}
-        {exchangeRate && (
+        {/* {exchangeRate && (
           <Grid item xs={12}>
             <p>Rate: {exchangeRate}</p>
           </Grid>
-        )}
+        )} */}
           </React.Fragment>
         )}
         {currentView === 'liquidity' && (

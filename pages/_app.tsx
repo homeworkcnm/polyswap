@@ -1,6 +1,6 @@
 import '../styles/globals.css';
 import '@rainbow-me/rainbowkit/styles.css';
-import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import { getDefaultWallets, RainbowKitProvider, midnightTheme } from '@rainbow-me/rainbowkit';
 import type { AppProps } from 'next/app';
 import { configureChains, createConfig, WagmiConfig, Chain } from 'wagmi';
 import {
@@ -66,7 +66,14 @@ const wagmiConfig = createConfig({
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <WagmiConfig config={wagmiConfig}>
-      <RainbowKitProvider coolMode chains={chains}>
+      <RainbowKitProvider 
+        coolMode chains={chains}
+        theme={midnightTheme({
+          accentColor: '#7b3fe4',
+          accentColorForeground: 'white',
+          borderRadius: 'medium',
+        })}
+      >
       <div style={{ fontFamily: 'Roboto Condensed', fontSize: '36px', color: 'white', position: 'absolute', top: 50, left: 40, padding: '10px' }}>
           Polyswap
         </div>
