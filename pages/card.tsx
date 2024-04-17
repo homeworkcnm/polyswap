@@ -42,7 +42,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   const [lp, setLp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [calculatedAmount, setCalculatedAmount] = useState('');
+  // const [calculatedAmount, setCalculatedAmount] = useState('');
   const [currentView, setCurrentView] = useState('rate');//change grid
   // const [contractInstance, setContractInstance] = useState(null);
   const [contractInstance, setContractInstance] = useState<Contract | null>(null);
@@ -138,7 +138,7 @@ loadWeb3();
     const newToken = event.target.value as string;
     setDownToken(newToken);
     if (upToken && fromamount){
-      await calculateOtherAmount(fromamount, 'from');
+      await calculateOtherAmount(fromamount);
     }else if (upToken && toamount){
       calculateOtherAmount(toamount);
     }
@@ -161,7 +161,7 @@ loadWeb3();
     setToAmount(newAmount);
     console.log(newAmount);
     if(upToken && downToken){
-      calculateOtherAmount(valueWithDecimals, 'to')
+      calculateOtherAmount(valueWithDecimals)
     }
   };
 
@@ -249,11 +249,11 @@ loadWeb3();
       const maxUint256 = '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'; 
       if (!toamount) {
         calculated = await contractInstance.methods.swapExactTokensForTokens(value, 0, [UpAddress, DownAddress], userAddress, false).call();
-        setCalculatedAmount(calculated);
+        setToAmount(calculated);
         console.log(calculated);
       } else {
         calculated = await contractInstance.methods.swapTokensForExactTokens(value, maxUint256, [DownAddress, UpAddress], userAddress, false).call();
-        setCalculatedAmount(calculated);
+        setFromAmount(calculated);
         console.log(calculated);
       }
       setLoading(false);
