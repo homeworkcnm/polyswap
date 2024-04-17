@@ -33,6 +33,8 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   const [toToken, setToToken] = useState('');
   const [fromamount, setFromAmount] = useState('');
   const [toamount, setToAmount] = useState('');
+  const [valueWithDecimals1, setvalueWithDecimals1] = useState('');
+  const [valueWithDecimals2, setvalueWithDecimals2] = useState('');
   const [v1amount, setV1Amount] = useState('');
   const [v11amount, setV11Amount] = useState('');
   const [v22amount, setV22Amount] = useState('');
@@ -127,51 +129,67 @@ loadWeb3();
   const handleUpTokenChange = async (event: React.ChangeEvent<{ value: unknown }>) => {
     const newToken = event.target.value as string;
     setUpToken(newToken);
-    console.log("ssssssssss");
-    if (downToken && fromamount){
-      console.log("pppppppppppp");
-      await calculateOtherAmountT(fromamount);
-    }else if (downToken && toamount){
-      console.log("oooooooooooooo");
-      calculateOtherAmountF(toamount);
-    }
+    // console.log("ssssssssss");
+    // if (upToken && downToken && fromamount && !toamount){
+    //   console.log("pppppppppppp");
+    //   await calculateOtherAmountT(fromamount);
+    // }else if (upToken && downToken && toamount && !fromamount){
+    //   console.log("oooooooooooooo");
+    //   calculateOtherAmountF(toamount);
+    // }
   };
 
   const handleDownTokenChange = async (event: React.ChangeEvent<{ value: unknown }>) => {
     const newToken = event.target.value as string;
     setDownToken(newToken);
-    console.log("ssssssssss");
-    if (upToken && fromamount){
-      console.log("pppppppppppp");
-      await calculateOtherAmountT(fromamount);
-    }else if (upToken && toamount){
-      console.log("oooooooooooooo");
-      calculateOtherAmountF(toamount);
-    }
+    // console.log("ssssssssss");
+    // if (downToken && upToken && fromamount && !toamount){
+    //   console.log("pppppppppppp");
+    //   await calculateOtherAmountT(fromamount);
+    // }else if (downToken && upToken && toamount && !fromamount){
+    //   console.log("oooooooooooooo");
+    //   calculateOtherAmountF(toamount);
+    // }
   };
 
   const handleFromAmountChange = async (event) => {
     const newAmount = event.target.value;
-    const valueWithDecimals = newAmount + '000000000000000000';
+    const Decimals1 = newAmount + '000000000000000000';
     setFromAmount(newAmount);
-    console.log(newAmount);
-    if(upToken && downToken){
-      console.log('calcuating');
-      calculateOtherAmountT(valueWithDecimals);
-    }
+    setvalueWithDecimals1(Decimals1);
+    // console.log(newAmount);
+    // if(fromamount && upToken && downToken){
+    //   console.log('calcuating');
+    //   calculateOtherAmountT(valueWithDecimals);
+    // }
   };
 
   const handleToAmountChange = async (event) => {
     const newAmount = event.target.value;
-    const valueWithDecimals = newAmount + '000000000000000000';
-    setToAmount(newAmount);
-    console.log(newAmount);
-    if(upToken && downToken){
-      calculateOtherAmountF(valueWithDecimals)
-    }
+    const Decimals2 = newAmount + '000000000000000000';
+    setToAmount(Decimals2);
+    // console.log(newAmount);
+    // if(toamount && upToken && downToken){
+    //   calculateOtherAmountF(valueWithDecimals)
+    // }
   };
 
-
+  useEffect(() => {
+    // Check if three of the four values are set
+    const values = [upToken, downToken, fromamount, toamount, valueWithDecimals1, valueWithDecimals2];
+    const filledValues = values.filter(Boolean).length; // Count how many are truthy
+  
+    if (filledValues >= 3) {
+      // Determine which function to call based on what is available
+      if (fromamount && upToken && downToken) {
+        console.log('Calculating from upToken to downToken...');
+        calculateOtherAmountT(valueWithDecimals1);
+      } else if (toamount && upToken && downToken) {
+        console.log('Calculating from downToken to upToken...');
+        calculateOtherAmountF(valueWithDecimals2);
+      }
+    }
+  }, [upToken, downToken, fromamount, toamount]);
 
 
   
