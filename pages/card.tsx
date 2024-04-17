@@ -140,6 +140,7 @@ loadWeb3();
   const handleDownTokenChange = async (event: React.ChangeEvent<{ value: unknown }>) => {
     const newToken = event.target.value as string;
     setDownToken(newToken);
+    console.log("ssssssssss");
     if (upToken && fromamount){
       console.log("pppppppppppp");
       await calculateOtherAmountT(fromamount);
