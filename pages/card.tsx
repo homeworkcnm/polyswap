@@ -31,6 +31,8 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   const [toToken, setToToken] = useState('');
   const [amount, setAmount] = useState('');
   const [v1amount, setV1Amount] = useState('');
+  const [v11amount, setV11Amount] = useState('');
+  const [v22amount, setV22Amount] = useState('');
   const [v2amount, setV2Amount] = useState('');
   const [exchangeRate, setExchangeRate] = useState('');
   const [transactionHash, setTransactionHash] = useState('');
@@ -106,12 +108,14 @@ loadWeb3();
   const handleV1AmountChange = (event) => {
     const etherValue = event.target.value;
     const weiValue = Web3.utils.toWei(etherValue, 'ether');
+    setV11Amount(etherValue);
     setV1Amount(weiValue);
   };
 
   const handleV2AmountChange = (event) => {
     const etherValue = event.target.value;
     const weiValue = Web3.utils.toWei(etherValue, 'ether');
+    setV22Amount(etherValue);
     setV2Amount(weiValue);
   };
   
@@ -341,7 +345,7 @@ loadWeb3();
         {currentView === 'liquidity' && (
           <React.Fragment>
         <Grid item xs={9}>
-          <TextField label="From Token" type="number" fullWidth value={v1amount} onChange={handleV1AmountChange}/>
+          <TextField label="From Token" type="number" fullWidth value={v11amount} onChange={handleV1AmountChange}/>
         </Grid>
         <Grid item xs={3}>
           <FormControl fullWidth>
@@ -353,7 +357,7 @@ loadWeb3();
           </FormControl>
         </Grid>
         <Grid item xs={9}>
-          <TextField label="To Token" type="number" fullWidth value={v2amount} onChange={handleV2AmountChange}/>
+          <TextField label="To Token" type="number" fullWidth value={v22amount} onChange={handleV2AmountChange}/>
         </Grid>
         <Grid item xs={3}>
           <FormControl fullWidth>
