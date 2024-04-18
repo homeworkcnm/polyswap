@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import Web3, { Contract } from "web3";
-import { Snackbar, Alert, TextField, Button, Grid, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
+import Web3, {Contract} from "web3";
+import { TextField, Button, Grid, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import styles from '../styles/Card.module.css';
 import contractABI from '../out/PolyswapRouter.sol/PolyswapRouter.json';
 import tokenABI from '../out/ERC20.sol/ERC20.json';
@@ -53,12 +53,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   const [isCurved, setIsCurved] = useState(false);
   const [userAddress, setUserAddress] = useState('');
   const [buttonText, setButtonText] = useState('Get Exchange Rate');
-  const [isConfirmed, setIsConfirmed] = useState(false);
-  const [deal1amount, setDeal1Amount] = useState('');
-  const [deal2amount, setDeal2Amount] = useState('');
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-
-
+  
   useEffect(() => {
     const fetchUserAddress = async () => {
       if ((window as any).ethereum) {
@@ -248,49 +243,15 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
       console.log(inputnumber);
       // const valueinWei = Web3.utils.toWei(value, 'ether');
       // if (!toamount) {
-      // console.log(isConfirmed);
-      // if (isConfirmed == true) {
-      // try {
-      // const web3 = new Web3((window as any).ethereum);
-      // setWeb3Instance(web3);
-      // const token0contract = new web3.eth.Contract(tokenABI.abi, token0contractAddress);
-      // console.log('approving token0'),
-      //   await token0contract.methods.approve(contractAddress, deal1amount).send({ from: userAddress }),
-      //   console.log("token0 approved"),
-      //   console.log("approve finished!");
-      // // calculated = await contractInstance.methods.swapExactTokensForTokens(inputnumber, 0, [UpAddress, DownAddress], userAddress, isConfirmed).call();
-      // // console.log(calculated);
-      //     setUpToken('');
-      //     setDownToken('');
-      //     setFromAmount('');
-      //     setToAmount('');
-      //     setButtonText('Get Exchange Rate');
-
-      //     console.log('swapppp successs');
-      //     setOpenSnackbar(true);
-      //   } catch (error) {
-      //     console.error('ERROR', error);
-      //   }
-      // } else {
-      calculated = await contractInstance.methods.swapExactTokensForTokens(inputnumber, 0, [UpAddress, DownAddress], userAddress, isConfirmed).call();
-      // const calculatedEther = Web3.utils.fromWei(calculated.toString(), 'ether');
-      // 
-      const rate = inputnumber / Number(calculated[1])
-      setExchangeRate(rate.toString());
-      setButtonText(`1 ${upToken} = ${rate.toFixed(2)} ${downToken}`);;
-      console.log(calculated);
-      const outputnumber = Number(calculated[1]) / (10 ** 18);
-      console.log(outputnumber);
-      // const outputAmount = calculated[1].toString();  // 转换 BigNumber 为字符串
-      const outputAmount = outputnumber.toString();  // 转换 BigNumber 为字符串
-      setToAmount(outputAmount);
-      console.log(outputAmount);
-      console.log(fromamount, toamount, upToken, downToken);
-      if (outputAmount == '0') {
-        setToAmount("");
-      }
-
-      
+        calculated = await contractInstance.methods.swapExactTokensForTokens(value, 0, [UpAddress, DownAddress], userAddress, false).call();
+        const rate = value/Number(calculated[1])
+        setExchangeRate(rate.toString());
+        setButtonText(`1 ${upToken} = ${rate.toFixed(2)} ${downToken}`);;
+        console.log(calculated);
+        const outputAmount = calculated[1].toString();  // 转换 BigNumber 为字符串
+        setToAmount(outputAmount);
+        console.log(outputAmount);
+      // }
       setLoading(false);
 
       console.log(isConfirmed);
@@ -325,47 +286,19 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
       let calculated;
       const valueinWei = Web3.utils.toWei(value, 'ether');
       // const maxUint256 = '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'; 
-      const maxUint256 = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-      console.log(maxUint256);
+      // const maxUint256 = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+      // console.log(maxUint256);
       // if (!fromamount) {
-      console.log(isConfirmed);
-      if (isConfirmed == true) {
-        try {
-          const web3 = new Web3((window as any).ethereum);
-          setWeb3Instance(web3);
-          const token1contract = new web3.eth.Contract(tokenABI.abi, token1contractAddress);
-          console.log('approving token1'),
-            token1contract.methods.approve(contractAddress, deal2amount).send({ from: userAddress }),
-            console.log('token1 approved');
-
-          console.log("approve finished!");
-          calculated = await contractInstance.methods.swapExactTokensForTokens(valueinWei, 0, [UpAddress, DownAddress], userAddress, isConfirmed).call();
-
-          setUpToken('');
-          setDownToken('');
-          setFromAmount('');
-          setToAmount('');
-          setButtonText('Get Exchange Rate');
-
-          console.log('swapppp successs');
-          setOpenSnackbar(true);
-        } catch (error) {
-          console.error('ERROR');
-        }
-      } else {
-        calculated = await contractInstance.methods.swapTokensForExactTokens(valueinWei, maxUint256, [DownAddress, UpAddress], userAddress, isConfirmed).call();
-        const calculatedEther = Web3.utils.fromWei(calculated.toString(), 'ether');
-        const rate = Number(calculated[0]) / value;
+        calculated = await contractInstance.methods.swapTokensForExactTokens(value, 0, [DownAddress, UpAddress], userAddress, false).call();
+        const rate = Number(calculated[0])/value;
         setExchangeRate(rate.toString());
         setButtonText(`1 ${upToken} = ${rate.toFixed(2)} ${downToken}`);
         console.log(calculated);
-        const outputAmount = calculatedEther[0].toString();  // 转换 BigNumber 为字符串
+        const outputAmount = calculated[0].toString();  // 转换 BigNumber 为字符串
         setFromAmount(outputAmount);
         console.log(outputAmount);
-        // }
-        setLoading(false);
-        console.log(isConfirmed);
-      }
+      // }
+      setLoading(false);
     } catch (error) {
       console.error('Error calculating token amount:', error);
       // direction === 'from' ? setCalculatedAmount('') : setAmount('');
@@ -445,47 +378,46 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
 
         {currentView === 'rate' && (
           <React.Fragment>
-            <Grid item xs={9}>
-              <TextField label="From Token" type="text" fullWidth value={fromamount} onChange={handleFromAmountChange} />
-            </Grid>
-            <Grid item xs={3}>
-              <FormControl fullWidth>
-                <InputLabel>Coin Type</InputLabel>
-                <Select value={upToken} onChange={handleUpTokenChange}>
-                  <MenuItem value="TOKEN0">TOKEN0</MenuItem>
-                  <MenuItem value="TOKEN1">TOKEN1</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={9}>
-              <TextField label="To Token" type="text" fullWidth value={toamount} onChange={handleToAmountChange} />
-            </Grid>
-            <Grid item xs={3}>
-              <FormControl fullWidth>
-                <InputLabel>Coin Type</InputLabel>
-                <Select value={downToken} onChange={handleDownTokenChange}>
-                  <MenuItem value="TOKEN0">TOKEN0</MenuItem>
-                  <MenuItem value="TOKEN1">TOKEN1</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={6}>
-              <Button variant="contained" color="primary" fullWidth>
-                {buttonText}
-              </Button>
-            </Grid>
-            <Grid item xs={6}>
-              <Button variant="contained" color="secondary" fullWidth onClick={handleConfirmSwapClick} >
-                CONFIRM SWAP
-              </Button>
-            </Grid>
-
-            {/* {transactionHash && (
+        <Grid item xs={9}>
+          <TextField label="From Token" type="number" fullWidth value={fromamount} onChange={handleFromAmountChange}/>
+        </Grid>
+        <Grid item xs={3}>
+          <FormControl fullWidth>
+            <InputLabel>Coin Type</InputLabel>
+            <Select value={upToken} onChange={handleUpTokenChange}>
+              <MenuItem value="TOKEN0">TOKEN0</MenuItem>
+              <MenuItem value="TOKEN1">TOKEN1</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={9}>
+          <TextField label="To Token" type="number" fullWidth value={toamount} onChange={handleToAmountChange} />
+        </Grid>
+        <Grid item xs={3}>
+          <FormControl fullWidth>
+            <InputLabel>Coin Type</InputLabel>
+            <Select value={downToken} onChange={handleDownTokenChange}>
+              <MenuItem value="TOKEN0">TOKEN0</MenuItem>
+              <MenuItem value="TOKEN1">TOKEN1</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={6}>
+          <Button variant="contained" color="primary" fullWidth>
+          {buttonText}
+          </Button>
+        </Grid>
+        <Grid item xs={6}>
+          <Button variant="contained" color="secondary" fullWidth >
+            CONFIRM SWAP
+          </Button>
+        </Grid>
+        {transactionHash && (
           <Grid item xs={12}>
           <p>Transaction Hash: {transactionHash}</p>
           </Grid>
-        )} */}
-            {/* {exchangeRate && (
+        )}
+        {/* {exchangeRate && (
           <Grid item xs={12}>
             <p>Rate: {exchangeRate}</p>
           </Grid>
@@ -535,8 +467,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
           </React.Fragment>
         )}
       </Grid>
-    </div>
-    </div>
+        </div>
   );
 };
 
