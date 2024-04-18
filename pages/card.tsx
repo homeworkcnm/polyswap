@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Web3, {Contract} from "web3";
+import Web3, { Contract } from "web3";
 import { TextField, Button, Grid, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import styles from '../styles/Card.module.css';
 import contractABI from '../out/PolyswapRouter.sol/PolyswapRouter.json';
@@ -44,63 +44,63 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   const [currentView, setCurrentView] = useState('rate');//change grid
   // const [contractInstance, setContractInstance] = useState(null);
   const [contractInstance, setContractInstance] = useState<Contract | null>(null);
-  const contractAddress='0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9';
+  const contractAddress = '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9';
   const [token0contractInstance, setToken0ContractInstance] = useState<Contract | null>(null);
-  const token0contractAddress='0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
+  const token0contractAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
   const [token1contractInstance, setToken1ContractInstance] = useState<Contract | null>(null);
-  const token1contractAddress='0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0';
+  const token1contractAddress = '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0';
   const [web3Instance, setWeb3Instance] = useState<Web3 | null>(null);
-  const [isCurved,setIsCurved] = useState(false) ;
+  const [isCurved, setIsCurved] = useState(false);
   const [userAddress, setUserAddress] = useState('');
   const [buttonText, setButtonText] = useState('Get Exchange Rate');
-  
-  useEffect(() => {
-  const fetchUserAddress = async () => {
-    if ((window as any).ethereum) {
-      console.log('success');
-      try {
-        await (window as any).ethereum.enable();
-        const provider = new ethers.providers.Web3Provider((window as any).ethereum);
-        const signer = provider.getSigner();
-        const address = await signer.getAddress();
-        setUserAddress(address);
-      } catch (error) {
-        console.error('Failed to fetch user address:', error);
-      }
-    }
-  };
 
-  fetchUserAddress();
-}, []);
+  useEffect(() => {
+    const fetchUserAddress = async () => {
+      if ((window as any).ethereum) {
+        console.log('success');
+        try {
+          await (window as any).ethereum.enable();
+          const provider = new ethers.providers.Web3Provider((window as any).ethereum);
+          const signer = provider.getSigner();
+          const address = await signer.getAddress();
+          setUserAddress(address);
+        } catch (error) {
+          console.error('Failed to fetch user address:', error);
+        }
+      }
+    };
+
+    fetchUserAddress();
+  }, []);
 
   useEffect(() => {
     const loadWeb3 = async () => {
-    console.log("Checking web3...")
-    if (typeof window !== 'undefined' && (window as any).ethereum){
-    // 创建Web3实例
-    try{
-    const web3 = new Web3((window as any).ethereum);
-    setWeb3Instance(web3);
-    console.log("web3 instance created", web3);
-    // 请求用户授权访问其以太坊账户
-    await (window as any).ethereum.request({ method: "eth_requestAccounts" });
-    console.log("ethereum enabled"); 
-    if (!contractInstance) {
-      const contract = new web3.eth.Contract(contractABI.abi, contractAddress);
-      console.log("contract instance created", contract);
-      setContractInstance(contract);
-    }
-    }catch (error) {
-      console.error("Error initializing web3 or contract:", error);
-    }
-  } else {
-    console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
-  }
-};
+      console.log("Checking web3...")
+      if (typeof window !== 'undefined' && (window as any).ethereum) {
+        // 创建Web3实例
+        try {
+          const web3 = new Web3((window as any).ethereum);
+          setWeb3Instance(web3);
+          console.log("web3 instance created", web3);
+          // 请求用户授权访问其以太坊账户
+          await (window as any).ethereum.request({ method: "eth_requestAccounts" });
+          console.log("ethereum enabled");
+          if (!contractInstance) {
+            const contract = new web3.eth.Contract(contractABI.abi, contractAddress);
+            console.log("contract instance created", contract);
+            setContractInstance(contract);
+          }
+        } catch (error) {
+          console.error("Error initializing web3 or contract:", error);
+        }
+      } else {
+        console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+      }
+    };
 
-loadWeb3();
+    loadWeb3();
   }, [contractInstance]);
-  
+
   const handleV1AmountChange = (event) => {
     const etherValue = event.target.value;
     const weiValue = Web3.utils.toWei(etherValue, 'ether');
@@ -122,7 +122,7 @@ loadWeb3();
   const handleToTokenChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     setToToken(event.target.value as string);
   };
-  
+
   const handleUpTokenChange = async (event: React.ChangeEvent<{ value: unknown }>) => {
     const newToken = event.target.value as string;
     setUpToken(newToken);
@@ -147,7 +147,7 @@ loadWeb3();
     // 检查设置的值数量
     const values = [upToken, downToken, fromamount, toamount];
     const filledValues = values.filter(Boolean).length;
-  
+
     if (filledValues >= 3) {
       if (fromamount && upToken && downToken) {
         console.log('Calculating from upToken to downToken...');
@@ -209,22 +209,23 @@ loadWeb3();
       setLoading(true);
       const web3 = new Web3((window as any).ethereum);
       setWeb3Instance(web3);
-      if(!web3){
-      console.log("00000000000000");}
+      if (!web3) {
+        console.log("00000000000000");
+      }
       const UpAddress = getTokenAddressBySymbol(upToken);
       console.log(UpAddress);
       const DownAddress = getTokenAddressBySymbol(downToken);
       console.log(DownAddress);
       let calculated;
       // if (!toamount) {
-        calculated = await contractInstance.methods.swapExactTokensForTokens(value, 0, [UpAddress, DownAddress], userAddress, false).call();
-        const rate = value/Number(calculated[1])
-        setExchangeRate(rate.toString());
-        setButtonText(`1 ${upToken} = ${rate.toFixed(2)} ${downToken}`);;
-        console.log(calculated);
-        const outputAmount = calculated[1].toString();  // 转换 BigNumber 为字符串
-        setToAmount(outputAmount);
-        console.log(outputAmount);
+      calculated = await contractInstance.methods.swapExactTokensForTokens(value, 0, [UpAddress, DownAddress], userAddress, false).call();
+      const rate = value / Number(calculated[1])
+      setExchangeRate(rate.toString());
+      setButtonText(`1 ${upToken} = ${rate.toFixed(2)} ${downToken}`);;
+      console.log(calculated);
+      const outputAmount = calculated[1].toString();  // 转换 BigNumber 为字符串
+      setToAmount(outputAmount);
+      console.log(outputAmount);
       // }
       setLoading(false);
     } catch (error) {
@@ -247,25 +248,26 @@ loadWeb3();
       setLoading(true);
       const web3 = new Web3((window as any).ethereum);
       setWeb3Instance(web3);
-      if(!web3){
-      console.log("00000000000000");}
+      if (!web3) {
+        console.log("00000000000000");
+      }
       const UpAddress = getTokenAddressBySymbol(upToken);
       console.log(UpAddress);
       const DownAddress = getTokenAddressBySymbol(downToken);
       console.log(DownAddress);
       let calculated;
       // const maxUint256 = '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'; 
-      // const maxUint256 = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+      const maxUint256 = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
       // console.log(maxUint256);
       // if (!fromamount) {
-        calculated = await contractInstance.methods.swapTokensForExactTokens(value, 0, [DownAddress, UpAddress], userAddress, false).call();
-        const rate = Number(calculated[0])/value;
-        setExchangeRate(rate.toString());
-        setButtonText(`1 ${upToken} = ${rate.toFixed(2)} ${downToken}`);
-        console.log(calculated);
-        const outputAmount = calculated[0].toString();  // 转换 BigNumber 为字符串
-        setFromAmount(outputAmount);
-        console.log(outputAmount);
+      calculated = await contractInstance.methods.swapTokensForExactTokens(value, maxUint256, [DownAddress, UpAddress], userAddress, false).call();
+      const rate = Number(calculated[0]) / value;
+      setExchangeRate(rate.toString());
+      setButtonText(`1 ${upToken} = ${rate.toFixed(2)} ${downToken}`);
+      console.log(calculated);
+      const outputAmount = calculated[0].toString();  // 转换 BigNumber 为字符串
+      setFromAmount(outputAmount);
+      console.log(outputAmount);
       // }
       setLoading(false);
     } catch (error) {
@@ -339,46 +341,46 @@ loadWeb3();
 
         {currentView === 'rate' && (
           <React.Fragment>
-        <Grid item xs={9}>
-          <TextField label="From Token" type="number" fullWidth value={fromamount} onChange={handleFromAmountChange}/>
-        </Grid>
-        <Grid item xs={3}>
-          <FormControl fullWidth>
-            <InputLabel>Coin Type</InputLabel>
-            <Select value={upToken} onChange={handleUpTokenChange}>
-              <MenuItem value="TOKEN0">TOKEN0</MenuItem>
-              <MenuItem value="TOKEN1">TOKEN1</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={9}>
-          <TextField label="To Token" type="number" fullWidth value={toamount} onChange={handleToAmountChange} />
-        </Grid>
-        <Grid item xs={3}>
-          <FormControl fullWidth>
-            <InputLabel>Coin Type</InputLabel>
-            <Select value={downToken} onChange={handleDownTokenChange}>
-              <MenuItem value="TOKEN0">TOKEN0</MenuItem>
-              <MenuItem value="TOKEN1">TOKEN1</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={6}>
-          <Button variant="contained" color="primary" fullWidth>
-          {buttonText}
-          </Button>
-        </Grid>
-        <Grid item xs={6}>
-          <Button variant="contained" color="secondary" fullWidth >
-            CONFIRM SWAP
-          </Button>
-        </Grid>
-        {transactionHash && (
-          <Grid item xs={12}>
-          <p>Transaction Hash: {transactionHash}</p>
-          </Grid>
-        )}
-        {/* {exchangeRate && (
+            <Grid item xs={9}>
+              <TextField label="From Token" type="number" fullWidth value={fromamount} onChange={handleFromAmountChange} />
+            </Grid>
+            <Grid item xs={3}>
+              <FormControl fullWidth>
+                <InputLabel>Coin Type</InputLabel>
+                <Select value={upToken} onChange={handleUpTokenChange}>
+                  <MenuItem value="TOKEN0">TOKEN0</MenuItem>
+                  <MenuItem value="TOKEN1">TOKEN1</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={9}>
+              <TextField label="To Token" type="number" fullWidth value={toamount} onChange={handleToAmountChange} />
+            </Grid>
+            <Grid item xs={3}>
+              <FormControl fullWidth>
+                <InputLabel>Coin Type</InputLabel>
+                <Select value={downToken} onChange={handleDownTokenChange}>
+                  <MenuItem value="TOKEN0">TOKEN0</MenuItem>
+                  <MenuItem value="TOKEN1">TOKEN1</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <Button variant="contained" color="primary" fullWidth>
+                {buttonText}
+              </Button>
+            </Grid>
+            <Grid item xs={6}>
+              <Button variant="contained" color="secondary" fullWidth >
+                CONFIRM SWAP
+              </Button>
+            </Grid>
+            {transactionHash && (
+              <Grid item xs={12}>
+                <p>Transaction Hash: {transactionHash}</p>
+              </Grid>
+            )}
+            {/* {exchangeRate && (
           <Grid item xs={12}>
             <p>Rate: {exchangeRate}</p>
           </Grid>
@@ -387,48 +389,48 @@ loadWeb3();
         )}
         {currentView === 'liquidity' && (
           <React.Fragment>
-        <Grid item xs={9}>
-          <TextField label="From Token" type="number" fullWidth value={v11amount} onChange={handleV1AmountChange}/>
-        </Grid>
-        <Grid item xs={3}>
-          <FormControl fullWidth>
-            <InputLabel>Coin Type</InputLabel>
-            <Select value={fromToken} onChange={handleFromTokenChange}>
-              <MenuItem value="TOKEN0">TOKEN0</MenuItem>
-              <MenuItem value="TOKEN1">TOKEN1</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={9}>
-          <TextField label="To Token" type="number" fullWidth value={v22amount} onChange={handleV2AmountChange}/>
-        </Grid>
-        <Grid item xs={3}>
-          <FormControl fullWidth>
-            <InputLabel>Coin Type</InputLabel>
-            <Select value={toToken} onChange={handleToTokenChange}>
-              <MenuItem value="TOKEN0">TOKEN0</MenuItem>
-              <MenuItem value="TOKEN1">TOKEN1</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={9}>
-          <Button variant="contained" color="primary" fullWidth onClick={handleCreateLiquidity}>
-            Create
-          </Button>
-        </Grid>
-        <Grid item xs={3}>
-          <FormControl fullWidth>
-            <InputLabel>Pool</InputLabel>
-            <Select value={lp} onChange={handleLPChange}>
-              <MenuItem value="Constant">Constant</MenuItem>
-              <MenuItem value="Curve">Curve</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
+            <Grid item xs={9}>
+              <TextField label="From Token" type="number" fullWidth value={v11amount} onChange={handleV1AmountChange} />
+            </Grid>
+            <Grid item xs={3}>
+              <FormControl fullWidth>
+                <InputLabel>Coin Type</InputLabel>
+                <Select value={fromToken} onChange={handleFromTokenChange}>
+                  <MenuItem value="TOKEN0">TOKEN0</MenuItem>
+                  <MenuItem value="TOKEN1">TOKEN1</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={9}>
+              <TextField label="To Token" type="number" fullWidth value={v22amount} onChange={handleV2AmountChange} />
+            </Grid>
+            <Grid item xs={3}>
+              <FormControl fullWidth>
+                <InputLabel>Coin Type</InputLabel>
+                <Select value={toToken} onChange={handleToTokenChange}>
+                  <MenuItem value="TOKEN0">TOKEN0</MenuItem>
+                  <MenuItem value="TOKEN1">TOKEN1</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={9}>
+              <Button variant="contained" color="primary" fullWidth onClick={handleCreateLiquidity}>
+                Create
+              </Button>
+            </Grid>
+            <Grid item xs={3}>
+              <FormControl fullWidth>
+                <InputLabel>Pool</InputLabel>
+                <Select value={lp} onChange={handleLPChange}>
+                  <MenuItem value="Constant">Constant</MenuItem>
+                  <MenuItem value="Curve">Curve</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
           </React.Fragment>
         )}
       </Grid>
-        </div>
+    </div>
   );
 };
 
