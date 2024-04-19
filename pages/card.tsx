@@ -6,6 +6,7 @@ import contractABI from '../out/PolyswapRouter.sol/PolyswapRouter.json';
 import tokenABI from '../out/ERC20.sol/ERC20.json';
 import polyswapABI from '../out/PolyswapPair.sol/PolyswapPair.json'
 import { ethers } from 'ethers';
+import { setFlagsFromString } from "v8";
 
 interface FlipCardProps {
   hue: number;
@@ -56,6 +57,8 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   const [inputValue, setInputValue] = useState('');
   const [withdrawfrom, setWithdrawfrom] = useState('');
   const [withdrawto, setWithdrawto] = useState('');
+  const [fromamountchanged, setfromamountchanged] = useState(false);
+  const [toamountchanged, settoamountchanged] = useState(false);
 
   useEffect(() => {
     const fetchUserAddress = async () => {
@@ -146,6 +149,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
 
   const handleFromAmountChange = (event) => {
     const newAmount = event.target.value;
+    setfromamountchanged(true);
     const weiValue = Web3.utils.toWei(newAmount, 'ether');
     setFromAmount(newAmount);
     setDeal1Amount(weiValue);
@@ -153,8 +157,8 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
 
   const handleToAmountChange = (event) => {
     const newAmount = event.target.value;
+    settoamountchanged(true);
     const weiValue = Web3.utils.toWei(newAmount, 'ether');
-    
     setToAmount(newAmount);
   };
 
@@ -163,18 +167,32 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
     const values = [upToken, downToken, fromamount, toamount];
     const filledValues = values.filter(Boolean).length;
 
-    if (filledValues >= 3) {
-      if (fromamount && upToken && downToken ) {
+    if (filledValues == 3) {
+      if (fromamount && upToken && downToken && !toamount ) {
         console.log('Calculating from upToken to downToken...');
         calculateOtherAmountT(fromamount);
-      } else if (toamount && upToken && downToken) {
+      } else if (toamount && upToken && downToken && !fromamount) {
         console.log('Calculating from downToken to upToken...');
         setwhichflow(1);
-        // console.log(whichflow);
         calculateOtherAmountF(toamount);
-       
+        setwhichflow(0);
       }
     }
+    if (filledValues == 4)
+    {
+        if(fromamountchanged == true)
+        {
+          calculateOtherAmountT(fromamount);
+        }
+        if(toamountchanged == true)
+        {
+          setwhichflow(1);
+          calculateOtherAmountF(toamount);
+          setwhichflow(0);
+          
+        }
+    }
+    
   }, [upToken, downToken, fromamount, toamount]); // 这些是依赖项，任何一个变化都会触发这个效果
 
   useEffect(() => {
@@ -291,7 +309,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
       console.log(outputnumber);
       // const outputAmount = outputnumber.toString();  // 转换 BigNumber 为字符串
       setToAmount(outputnumber.toString());
-      console.log(outputnumber);
+      setfromamountchanged(false);
       console.log(fromamount, toamount, upToken, downToken);
       setLoading(false);
     }
@@ -336,10 +354,12 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
       console.log(outputnumber);
       // const outputAmount = outputnumber.toString();  // 转换 BigNumber 为字符串
       setFromAmount(outputnumber.toString());
+      settoamountchanged(false);
       console.log(outputnumber);
       console.log(fromamount, toamount, upToken, downToken);
     } catch (error) {
       console.error('Error calculating token amount:', error);
+
       setLoading(false);
     }
   };
