@@ -27,8 +27,8 @@ const getTokenAddressBySymbol = (tokenSymbol: string): string => {
 const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   const [upToken, setUpToken] = useState('');
   const [downToken, setDownToken] = useState('');
-  const [fromToken, setFromToken] = useState('');
-  const [toToken, setToToken] = useState('');
+  const [fromToken, setFromToken] = useState(0);
+  const [toToken, setToToken] = useState(0);
   const [fromamount, setFromAmount] = useState('');
   const [toamount, setToAmount] = useState('');
   const [v1amount, setV1Amount] = useState('');
@@ -168,7 +168,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
         setwhichtoken(0);
       }
     }
-  }, [upToken, downToken, fromamount, toamount, isConfirmed]); // 这些是依赖项，任何一个变化都会触发这个效果
+  }, [upToken, downToken, fromamount, toamount]); // 这些是依赖项，任何一个变化都会触发这个效果
 
   const handleGetRateClick = () => {
     setCurrentView('rate');
@@ -191,6 +191,11 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
       await token0contract.methods.approve(contractAddress, deal1amount).send({ from: userAddress }),
       console.log("token0 approved"),
       console.log("approve finished!");
+      const UpAddress = getTokenAddressBySymbol(upToken);
+      const DownAddress = getTokenAddressBySymbol(downToken);
+      const inputnumber = fromamount * (10 ** 18);
+      console.log(inputnumber);
+      await contractInstance.methods.swapExactTokensForTokens(inputnumber, 0, [UpAddress, DownAddress], userAddress, true).call();
       }else{
         const token1contract = new web3.eth.Contract(tokenABI.abi, token1contractAddress);
         console.log('approving token1'),
@@ -239,7 +244,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
       console.log(inputnumber);
       // const valueinWei = Web3.utils.toWei(value, 'ether');
       // if (!toamount) {
-      calculated = await contractInstance.methods.swapExactTokensForTokens(inputnumber, 0, [UpAddress, DownAddress], userAddress, true).call();
+      calculated = await contractInstance.methods.swapExactTokensForTokens(inputnumber, 0, [UpAddress, DownAddress], userAddress, false).call();
       // const calculatedEther = Web3.utils.fromWei(calculated.toString(), 'ether');
       // 
       const rate =Number(calculated[1]) / inputnumber;
