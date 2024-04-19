@@ -59,7 +59,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   const [withdrawto, setWithdrawto] = useState('');
   const [fromamountchanged, setfromamountchanged] = useState(false);
   const [toamountchanged, settoamountchanged] = useState(false);
-
+  const [enough, setenough] = useState(false);
   useEffect(() => {
     const fetchUserAddress = async () => {
       if ((window as any).ethereum) {
@@ -157,9 +157,14 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
 
   const handleToAmountChange = (event) => {
     const newAmount = event.target.value;
+  
+    
     settoamountchanged(true);
-    const weiValue = Web3.utils.toWei(newAmount, 'ether');
-    setToAmount(newAmount);
+      const weiValue = Web3.utils.toWei(newAmount, 'ether');
+      setToAmount(newAmount);
+    
+     
+    
   };
 
   useEffect(() => {
@@ -167,32 +172,41 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
     const values = [upToken, downToken, fromamount, toamount];
     const filledValues = values.filter(Boolean).length;
 
-    if (filledValues == 3) {
+    if (filledValues == 3 && enough == false) {
       if (fromamount && upToken && downToken && !toamount ) {
         console.log('Calculating from upToken to downToken...');
+        setwhichflow(0);
         calculateOtherAmountT(fromamount);
+        setenough(true);
       } else if (toamount && upToken && downToken && !fromamount) {
         console.log('Calculating from downToken to upToken...');
         setwhichflow(1);
         calculateOtherAmountF(toamount);
-        setwhichflow(0);
+        setenough(true);
       }
     }
-    if (filledValues == 4)
+    else if (filledValues == 4)
     {
         if(fromamountchanged == true)
         {
+          setwhichflow(0);
           calculateOtherAmountT(fromamount);
         }
         if(toamountchanged == true)
         {
           setwhichflow(1);
+          console.log(whichflow);
           calculateOtherAmountF(toamount);
-          setwhichflow(0);
-          
+          console.log(toamount);
+          console.log(enough);
         }
     }
-    
+    else if ((filledValues == 3 && toamount == '' && enough == true)||(filledValues == 3 && fromamount == '' && enough ==true))
+    {
+      setFromAmount('');
+      setToAmount('');
+      setenough(false);
+    }
   }, [upToken, downToken, fromamount, toamount]); // 这些是依赖项，任何一个变化都会触发这个效果
 
   useEffect(() => {
@@ -310,6 +324,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
       // const outputAmount = outputnumber.toString();  // 转换 BigNumber 为字符串
       setToAmount(outputnumber.toString());
       setfromamountchanged(false);
+      settoamountchanged(false);
       console.log(fromamount, toamount, upToken, downToken);
       setLoading(false);
     }
@@ -355,6 +370,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
       // const outputAmount = outputnumber.toString();  // 转换 BigNumber 为字符串
       setFromAmount(outputnumber.toString());
       settoamountchanged(false);
+      setfromamountchanged(false);
       console.log(outputnumber);
       console.log(fromamount, toamount, upToken, downToken);
     } catch (error) {
@@ -481,7 +497,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
           {currentView === 'rate' && (
             <React.Fragment>
               <Grid item xs={9}>
-                <TextField label="From Token" type="number" fullWidth value={fromamount} onChange={handleFromAmountChange} />
+                <TextField label="From Token" type="text" fullWidth value={fromamount} onChange={handleFromAmountChange} />
               </Grid>
               <Grid item xs={3}>
                 <FormControl fullWidth>
@@ -495,7 +511,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
                 </FormControl>
               </Grid>
               <Grid item xs={9}>
-                <TextField label="To Token" type="number" fullWidth value={toamount} onChange={handleToAmountChange} />
+                <TextField label="To Token" type="text" fullWidth value={toamount} onChange={handleToAmountChange} />
               </Grid>
               <Grid item xs={3}>
                 <FormControl fullWidth>
