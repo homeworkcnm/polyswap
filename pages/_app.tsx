@@ -30,7 +30,7 @@ const localChain: Chain = {
   blockExplorers: {
     default: {
       name: 'Local Explorer',
-      url: '', // No block explorer available for local networks
+      url: 'http://127.0.0.1:8545', // No block explorer available for local networks
     }
   },
   testnet: true,
