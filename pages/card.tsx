@@ -50,7 +50,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   const [isCurved, setIsCurved] = useState(false);
   const [userAddress, setUserAddress] = useState('');
   const [buttonText, setButtonText] = useState('Get Exchange Rate');
-  const [deal1amount, setDeal1Amount] = useState('');
+  // const [deal1amount, setDeal1Amount] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [whichflow, setwhichflow] = useState(0);
   const [openDialog, setOpenDialog] = useState(false);
@@ -152,19 +152,15 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
     setfromamountchanged(true);
     const weiValue = Web3.utils.toWei(newAmount, 'ether');
     setFromAmount(newAmount);
-    setDeal1Amount(weiValue);
+    // setDeal1Amount(weiValue);
+    // console.log(deal1amount);
   };
 
   const handleToAmountChange = (event) => {
     const newAmount = event.target.value;
-  
-    
     settoamountchanged(true);
       const weiValue = Web3.utils.toWei(newAmount, 'ether');
       setToAmount(newAmount);
-    
-     
-    
   };
 
   useEffect(() => {
@@ -252,7 +248,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
       const DownAddress = getTokenAddressBySymbol(downToken);
       const upcontract = new web3.eth.Contract(tokenABI.abi, UpAddress);
       console.log('approving token...');
-      await upcontract.methods.approve(contractAddress,deal1amount).send({from:userAddress});
+      await upcontract.methods.approve(contractAddress,Web3.utils.toWei(fromamount, 'ether')).send({from:userAddress});
       const inputnumber = Number(fromamount) * (10 ** 18);
       console.log(inputnumber);
       console.log(UpAddress);
@@ -264,7 +260,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
         const DownAddress = getTokenAddressBySymbol(downToken);
         const upcontract = new web3.eth.Contract(tokenABI.abi, UpAddress);
         console.log('approving token...');
-        await upcontract.methods.approve(contractAddress,deal1amount).send({from:userAddress});
+        await upcontract.methods.approve(contractAddress,Web3.utils.toWei(fromamount, 'ether')).send({from:userAddress});
         const inputnumber = Number(fromamount) * (10 ** 18);
         console.log(inputnumber);
         console.log(UpAddress);
