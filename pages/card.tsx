@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Web3, { Contract } from "web3";
-import { Dialog,DialogTitle,DialogContent,DialogActions,Snackbar, Alert, TextField, Button, Grid, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, TextField, Button, Grid, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import styles from '../styles/Card.module.css';
 import contractABI from '../out/PolyswapRouter.sol/PolyswapRouter.json';
 import tokenABI from '../out/ERC20.sol/ERC20.json';
@@ -50,7 +50,6 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   const [isCurved, setIsCurved] = useState(false);
   const [userAddress, setUserAddress] = useState('');
   const [buttonText, setButtonText] = useState('Get Exchange Rate');
-  // const [deal1amount, setDeal1Amount] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [whichflow, setwhichflow] = useState(0);
   const [openDialog, setOpenDialog] = useState(false);
@@ -152,15 +151,13 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
     setfromamountchanged(true);
     const weiValue = Web3.utils.toWei(newAmount, 'ether');
     setFromAmount(newAmount);
-    // setDeal1Amount(weiValue);
-    // console.log(deal1amount);
   };
 
   const handleToAmountChange = (event) => {
     const newAmount = event.target.value;
     settoamountchanged(true);
-      const weiValue = Web3.utils.toWei(newAmount, 'ether');
-      setToAmount(newAmount);
+    const weiValue = Web3.utils.toWei(newAmount, 'ether');
+    setToAmount(newAmount);
   };
 
   useEffect(() => {
@@ -169,7 +166,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
     const filledValues = values.filter(Boolean).length;
 
     if (filledValues == 3 && enough == false) {
-      if (fromamount && upToken && downToken && !toamount ) {
+      if (fromamount && upToken && downToken && !toamount) {
         console.log('Calculating from upToken to downToken...');
         setwhichflow(0);
         calculateOtherAmountT(fromamount);
@@ -181,24 +178,20 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
         setenough(true);
       }
     }
-    else if (filledValues == 4)
-    {
-        if(fromamountchanged == true)
-        {
-          setwhichflow(0);
-          calculateOtherAmountT(fromamount);
-        }
-        if(toamountchanged == true)
-        {
-          setwhichflow(1);
-          console.log(whichflow);
-          calculateOtherAmountF(toamount);
-          console.log(toamount);
-          console.log(enough);
-        }
+    else if (filledValues == 4) {
+      if (fromamountchanged == true) {
+        setwhichflow(0);
+        calculateOtherAmountT(fromamount);
+      }
+      if (toamountchanged == true) {
+        setwhichflow(1);
+        console.log(whichflow);
+        calculateOtherAmountF(toamount);
+        console.log(toamount);
+        console.log(enough);
+      }
     }
-    else if ((filledValues == 3 && toamount == '' && enough == true)||(filledValues == 3 && fromamount == '' && enough ==true))
-    {
+    else if ((filledValues == 3 && toamount == '' && enough == true) || (filledValues == 3 && fromamount == '' && enough == true)) {
       setFromAmount('');
       setToAmount('');
       setenough(false);
@@ -207,7 +200,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
 
   useEffect(() => {
     console.log(whichflow); // 在回调函数中输出 whichflow 的值
-  }, [whichflow]); 
+  }, [whichflow]);
 
   const handleGetRateClick = () => {
     setCurrentView('rate');
@@ -243,31 +236,31 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
     if (fromamount && toamount && upToken && downToken) {
       const web3 = new Web3((window as any).ethereum);
       setWeb3Instance(web3);
-      if(whichflow == 0){
-      const UpAddress = getTokenAddressBySymbol(upToken);
-      const DownAddress = getTokenAddressBySymbol(downToken);
-      const upcontract = new web3.eth.Contract(tokenABI.abi, UpAddress);
-      console.log('approving token...');
-      await upcontract.methods.approve(contractAddress,Web3.utils.toWei(fromamount, 'ether')).send({from:userAddress});
-      const inputnumber = Number(fromamount) * (10 ** 18);
-      console.log(inputnumber);
-      console.log(UpAddress);
-      console.log(DownAddress);
-      console.log(userAddress);
-      await contractInstance.methods.swapExactTokensForTokens(inputnumber, 0, [UpAddress, DownAddress], userAddress, true).send({from:userAddress});
-      }else{
+      if (whichflow == 0) {
         const UpAddress = getTokenAddressBySymbol(upToken);
         const DownAddress = getTokenAddressBySymbol(downToken);
         const upcontract = new web3.eth.Contract(tokenABI.abi, UpAddress);
         console.log('approving token...');
-        await upcontract.methods.approve(contractAddress,Web3.utils.toWei(fromamount, 'ether')).send({from:userAddress});
+        await upcontract.methods.approve(contractAddress, Web3.utils.toWei(fromamount, 'ether')).send({ from: userAddress });
+        const inputnumber = Number(fromamount) * (10 ** 18);
+        console.log(inputnumber);
+        console.log(UpAddress);
+        console.log(DownAddress);
+        console.log(userAddress);
+        await contractInstance.methods.swapExactTokensForTokens(inputnumber, 0, [UpAddress, DownAddress], userAddress, true).send({ from: userAddress });
+      } else {
+        const UpAddress = getTokenAddressBySymbol(upToken);
+        const DownAddress = getTokenAddressBySymbol(downToken);
+        const upcontract = new web3.eth.Contract(tokenABI.abi, UpAddress);
+        console.log('approving token...');
+        await upcontract.methods.approve(contractAddress, Web3.utils.toWei(fromamount, 'ether')).send({ from: userAddress });
         const inputnumber = Number(fromamount) * (10 ** 18);
         console.log(inputnumber);
         console.log(UpAddress);
         console.log(DownAddress);
         console.log(userAddress);
         const maxUint256 = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-        await contractInstance.methods.swapTokensForExactTokens(inputnumber, maxUint256, [UpAddress, DownAddress], userAddress, true).send({from:userAddress});
+        await contractInstance.methods.swapTokensForExactTokens(inputnumber, maxUint256, [UpAddress, DownAddress], userAddress, true).send({ from: userAddress });
         setOpenSnackbar(true);
       }
     }
@@ -310,14 +303,13 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
       const inputnumber = Number(value) * (10 ** 18);
       console.log(inputnumber);
       calculated = await contractInstance.methods.swapExactTokensForTokens(inputnumber, 0, [UpAddress, DownAddress], userAddress, false).call();
-      const rate =Number(calculated[1]) / inputnumber;
+      const rate = Number(calculated[1]) / inputnumber;
       console.log(rate);
       setExchangeRate(rate.toString());
       setButtonText(`1 ${upToken} = ${rate.toFixed(4)} ${downToken}`);;
       console.log(calculated);
       const outputnumber = Number(calculated[1]) / (10 ** 18);
       console.log(outputnumber);
-      // const outputAmount = outputnumber.toString();  // 转换 BigNumber 为字符串
       setToAmount(outputnumber.toString());
       setfromamountchanged(false);
       settoamountchanged(false);
@@ -357,13 +349,12 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
       console.log(maxUint256);
       console.log(contractInstance);
       calculated = await contractInstance.methods.swapTokensForExactTokens(inputnumber, maxUint256, [DownAddress, UpAddress], userAddress, false).call();
-      const rate =  inputnumber / Number(calculated[0])
+      const rate = inputnumber / Number(calculated[0])
       setExchangeRate(rate.toString());
       setButtonText(`1 ${upToken} = ${rate.toFixed(4)} ${downToken}`);;
       console.log(calculated);
       const outputnumber = Number(calculated[0]) / (10 ** 18);
       console.log(outputnumber);
-      // const outputAmount = outputnumber.toString();  // 转换 BigNumber 为字符串
       setFromAmount(outputnumber.toString());
       settoamountchanged(false);
       setfromamountchanged(false);
@@ -405,8 +396,8 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
         0, // amountAMin
         0, // amountBMin
         userAddress, // to (可以是用户的地址或其他目标地址)
-        isCurved 
-      ).send({ from: userAddress }); 
+        isCurved
+      ).send({ from: userAddress });
       console.log('Transaction receipt:', receipt);
       setLoading(false);
     } catch (error) {
@@ -427,18 +418,16 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
       const polyswapcontract1 = new web3.eth.Contract(polyswapABI.abi, polyswapcontract1Address);
       const polyswapcontract2 = new web3.eth.Contract(polyswapABI.abi, polyswapcontract2Address);
       console.log('start calling'),
-      console.log(UpAddress);
+        console.log(UpAddress);
       console.log(DownAddress);
       const withdrawamount = Number(inputValue) * (10 ** 18);
       console.log(withdrawamount);
-      if((UpAddress == '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'|| UpAddress == '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0') 
-      && (DownAddress == '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512' || DownAddress == '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0'))
-      {
+      if ((UpAddress == '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512' || UpAddress == '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0')
+        && (DownAddress == '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512' || DownAddress == '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0')) {
         await polyswapcontract1.methods.approve(contractAddress, withdrawamount).send({ from: userAddress });
       }
-      else if((UpAddress == '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9' || UpAddress == '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9')
-      && (DownAddress == '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9' || DownAddress == '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9'))
-      {
+      else if ((UpAddress == '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9' || UpAddress == '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9')
+        && (DownAddress == '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9' || DownAddress == '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9')) {
         console.log('yesss');
         await polyswapcontract2.methods.approve(contractAddress, withdrawamount).send({ from: userAddress });
       }
@@ -450,7 +439,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
         0, // amountADesired
         0, // amountBDesired
         userAddress, // to (可以是用户的地址或其他目标地址)
-      ).send({ from: userAddress }); 
+      ).send({ from: userAddress });
       setLoading(false);
       setOpenDialog(false);
       setWithdrawfrom('');
@@ -583,47 +572,47 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
                 </Button>
               </Grid>
               <Dialog open={openDialog} onClose={handleDialogClose}>
-          <DialogTitle>TYPE IN</DialogTitle>
-          <DialogContent>
-          <div style={dialogStyle}>
-            <FormControl style={formControlStyle}>
-              <InputLabel>From Coin</InputLabel>
-              <Select value={withdrawfrom} onChange={handleWF}>
-                <MenuItem value="TOKEN0">TOKEN0</MenuItem>
-                <MenuItem value="TOKEN1">TOKEN1</MenuItem>
-                <MenuItem value="TOKEN2">TOKEN2</MenuItem>
-                <MenuItem value="TOKEN3">TOKEN3</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl style={formControlStyle}>
-              <InputLabel>To Coin</InputLabel>
-              <Select value={withdrawto} onChange={handleWT}>
-                <MenuItem value="TOKEN0">TOKEN0</MenuItem>
-                <MenuItem value="TOKEN1">TOKEN1</MenuItem>
-                <MenuItem value="TOKEN2">TOKEN2</MenuItem>
-                <MenuItem value="TOKEN3">TOKEN3</MenuItem>
-              </Select>
-            </FormControl>
-          </div>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Amount"
-            type="number"
-            value={inputValue}
-            onChange={handleInputChange}
-            fullWidth
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDialogClose} color="primary">
-            CANCEL
-          </Button>
-          <Button onClick={handleConfirmWithdraw} color="primary">
-            CONFIRM
-          </Button>
-        </DialogActions>
-      </Dialog>
+                <DialogTitle>TYPE IN</DialogTitle>
+                <DialogContent>
+                  <div style={dialogStyle}>
+                    <FormControl style={formControlStyle}>
+                      <InputLabel>From Coin</InputLabel>
+                      <Select value={withdrawfrom} onChange={handleWF}>
+                        <MenuItem value="TOKEN0">TOKEN0</MenuItem>
+                        <MenuItem value="TOKEN1">TOKEN1</MenuItem>
+                        <MenuItem value="TOKEN2">TOKEN2</MenuItem>
+                        <MenuItem value="TOKEN3">TOKEN3</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <FormControl style={formControlStyle}>
+                      <InputLabel>To Coin</InputLabel>
+                      <Select value={withdrawto} onChange={handleWT}>
+                        <MenuItem value="TOKEN0">TOKEN0</MenuItem>
+                        <MenuItem value="TOKEN1">TOKEN1</MenuItem>
+                        <MenuItem value="TOKEN2">TOKEN2</MenuItem>
+                        <MenuItem value="TOKEN3">TOKEN3</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </div>
+                  <TextField
+                    autoFocus
+                    margin="dense"
+                    label="Amount"
+                    type="number"
+                    value={inputValue}
+                    onChange={handleInputChange}
+                    fullWidth
+                  />
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleDialogClose} color="primary">
+                    CANCEL
+                  </Button>
+                  <Button onClick={handleConfirmWithdraw} color="primary">
+                    CONFIRM
+                  </Button>
+                </DialogActions>
+              </Dialog>
               <Grid item xs={2}>
                 <FormControl fullWidth>
                   <InputLabel>Pool</InputLabel>
