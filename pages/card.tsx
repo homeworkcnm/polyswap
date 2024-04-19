@@ -57,6 +57,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
   const [deal1amount, setDeal1Amount] = useState('');
   const [deal2amount, setDeal2Amount] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [whichtoken, setwhichtoken] = useState(0);
 
   useEffect(() => {
     const fetchUserAddress = async () => {
@@ -148,7 +149,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
     const newAmount = event.target.value;
     const weiValue = Web3.utils.toWei(newAmount, 'ether');
     setToAmount(newAmount);
-    setDeal1Amount(weiValue);
+    setDeal2Amount(weiValue);
   };
 
   useEffect(() => {
@@ -162,7 +163,9 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
         calculateOtherAmountT(fromamount);
       } else if (toamount && upToken && downToken) {
         console.log('Calculating from downToken to upToken...');
+        setwhichtoken(1);
         calculateOtherAmountF(toamount);
+        setwhichtoken(0);
       }
     }
   }, [upToken, downToken, fromamount, toamount, isConfirmed]); // 这些是依赖项，任何一个变化都会触发这个效果
@@ -179,35 +182,24 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
     console.log(isConfirmed);
     if (fromamount && toamount && upToken && downToken) {
       setIsConfirmed(true);
+      console.log(isConfirmed);
       const web3 = new Web3((window as any).ethereum);
       setWeb3Instance(web3);
+      if(whichtoken == 0){
       const token0contract = new web3.eth.Contract(tokenABI.abi, token0contractAddress);
       console.log('approving token0'),
-        await token0contract.methods.approve(contractAddress, deal1amount).send({ from: userAddress }),
-        console.log("token0 approved"),
+      await token0contract.methods.approve(contractAddress, deal1amount).send({ from: userAddress }),
+      console.log("token0 approved"),
+      console.log("approve finished!");
+      }else{
+        const token1contract = new web3.eth.Contract(tokenABI.abi, token1contractAddress);
+        console.log('approving token1'),
+        await token1contract.methods.approve(contractAddress, deal2amount).send({ from: userAddress }),
+        console.log("token1 approved"),
         console.log("approve finished!");
+      }
     }
   };
-
-  // const performSwap = () => {
-  //   if( fromamount && toamount && upToken && downToken)
-  //   {
-
-  //   }
-  // if (!fromamount || !fromToken || !toToken) {
-  //   setError('Please ensure all fields are filled out correctly.');
-  //   return;
-  // }
-  // try {
-  //   setLoading(true);
-  //   const receipt = await contractInstance.methods.swapTokens(fromToken, toToken, amount).send({ from: web3.currentProvider.selectedAddress });
-  //   setTransactionHash(receipt.transactionHash);
-  //   setLoading(false);
-  // } catch (err) {
-  //   setError('Transaction failed');
-  //   setLoading(false);
-  //   // }
-  // };
 
   const handleLPChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     const value = event.target.value as string;
@@ -247,12 +239,13 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
       console.log(inputnumber);
       // const valueinWei = Web3.utils.toWei(value, 'ether');
       // if (!toamount) {
-      calculated = await contractInstance.methods.swapExactTokensForTokens(inputnumber, 0, [UpAddress, DownAddress], userAddress, isConfirmed).call();
+      calculated = await contractInstance.methods.swapExactTokensForTokens(inputnumber, 0, [UpAddress, DownAddress], userAddress, true).call();
       // const calculatedEther = Web3.utils.fromWei(calculated.toString(), 'ether');
       // 
-      const rate = inputnumber / Number(calculated[1])
+      const rate =Number(calculated[1]) / inputnumber;
+      console.log(rate);
       setExchangeRate(rate.toString());
-      setButtonText(`1 ${upToken} = ${rate.toFixed(2)} ${downToken}`);;
+      setButtonText(`1 ${upToken} = ${rate.toFixed(4)} ${downToken}`);;
       console.log(calculated);
       const outputnumber = Number(calculated[1]) / (10 ** 18);
       console.log(outputnumber);
@@ -297,51 +290,25 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
       const DownAddress = getTokenAddressBySymbol(downToken);
       console.log(DownAddress);
       let calculated;
-
-
-      const valueinWei = Web3.utils.toWei(value, 'ether');
+      const inputnumber = value * (10 ** 18);
+      console.log(inputnumber);
       // const maxUint256 = '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'; 
       const maxUint256 = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
       console.log(maxUint256);
+      calculated = await contractInstance.methods.swapTokensForExactTokens(inputnumber, maxUint256, [UpAddress, DownAddress], userAddress, isConfirmed).call();
+      const rate = inputnumber / Number(calculated[0])
+      setExchangeRate(rate.toString());
+      setButtonText(`1 TOKEN1 = ${rate.toFixed(2)} TOKEN0`);;
+      console.log(calculated);
+      const outputnumber = Number(calculated[0]) / (10 ** 18);
+      console.log(outputnumber);
+      // const outputAmount = calculated[1].toString();  // 转换 BigNumber 为字符串
+      const outputAmount = outputnumber.toString();  // 转换 BigNumber 为字符串
+      setFromAmount(outputAmount);
+      console.log(outputAmount);
+      console.log(fromamount, toamount, upToken, downToken);
       // if (!fromamount) {
-      console.log(isConfirmed);
-      if (isConfirmed == true) {
-        try {
-          const web3 = new Web3((window as any).ethereum);
-          setWeb3Instance(web3);
-          const token1contract = new web3.eth.Contract(tokenABI.abi, token1contractAddress);
-          console.log('approving token1'),
-            token1contract.methods.approve(contractAddress, deal2amount).send({ from: userAddress }),
-            console.log('token1 approved');
-
-          console.log("approve finished!");
-          calculated = await contractInstance.methods.swapExactTokensForTokens(valueinWei, 0, [UpAddress, DownAddress], userAddress, isConfirmed).call();
-
-          setUpToken('');
-          setDownToken('');
-          setFromAmount('');
-          setToAmount('');
-          setButtonText('Get Exchange Rate');
-
-          console.log('swapppp successs');
-          setOpenSnackbar(true);
-        } catch (error) {
-          console.error('ERROR');
-        }
-      } else {
-        calculated = await contractInstance.methods.swapTokensForExactTokens(valueinWei, maxUint256, [DownAddress, UpAddress], userAddress, isConfirmed).call();
-        const calculatedEther = Web3.utils.fromWei(calculated.toString(), 'ether');
-        const rate = Number(calculated[0]) / value;
-        setExchangeRate(rate.toString());
-        setButtonText(`1 ${upToken} = ${rate.toFixed(2)} ${downToken}`);
-        console.log(calculated);
-        const outputAmount = calculatedEther[0].toString();  // 转换 BigNumber 为字符串
-        setFromAmount(outputAmount);
-        console.log(outputAmount);
-        // }
-        setLoading(false);
-        console.log(isConfirmed);
-      }
+      // if (isConfirmed == true) {
 
     } catch (error) {
       console.error('Error calculating token amount:', error);
@@ -452,7 +419,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ hue, details }) => {
                 </Button>
               </Grid>
               <Grid item xs={6}>
-                <Button variant="contained" color="secondary" fullWidth >
+                <Button variant="contained" color="secondary" fullWidth onClick={handleConfirmSwapClick} >
                   CONFIRM SWAP
                 </Button>
               </Grid>
