@@ -32,8 +32,10 @@
 }
 
 .custom-grid-padding {
-  padding-left: 16px; /* Left padding */
-  padding-right: 16px; /* Right padding */
+  padding-left: 16px;
+  /* Left padding */
+  padding-right: 16px;
+  /* Right padding */
   width: 100%;
   height: 100%;
   background: var(--white-1);

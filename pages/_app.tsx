@@ -25,7 +25,7 @@ const localChain: Chain = {
   },
   rpcUrls: {
     default: { http: ['http://127.0.0.1:8545']}, 
-    public: { http: ['http://127.0.0.1:8545']} // URL to your local Ethereum node
+    public: { http: ['http://127.0.0.1:8545']}
   },
   blockExplorers: {
     default: {
@@ -36,6 +36,8 @@ const localChain: Chain = {
   testnet: true,
 };
 
+
+//default chains
 const { chains, publicClient, webSocketPublicClient } = configureChains(
   [
     localChain,

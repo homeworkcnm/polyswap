@@ -31,7 +31,7 @@ export default function Home(): JSX.Element {
 
   return (
     <div>
-      <StarsWrapper /> {/* 星星作为背景容器 */}
+      <StarsWrapper /> {/*starry sky as background container */}
       <div className={styles.container} style={{ zIndex: 1 }}>
         <Head>
           <title>PolySwap</title>
@@ -57,7 +57,6 @@ export default function Home(): JSX.Element {
               buttonText="Mint"
             />
           </div>
-          {/* {userAddress && <p>User Address: {userAddress}</p>} */}
         </main>
       </div>
     </div>

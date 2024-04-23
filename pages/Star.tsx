@@ -13,6 +13,7 @@ const Star: React.FC<StarProps> = ({ cx, cy, r }) => (
 );
 
 const StarsWrapper: React.FC = () => {
+    //primary setting of the stars
     const starsData: StarProps[] = [
         { cx: '95.24%', cy: '73.06%', r: '1.1' },
         { cx: '67.09%', cy: '32.53%', r: '1.3' },
